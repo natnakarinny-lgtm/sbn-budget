@@ -419,6 +419,7 @@ details.dq[open] summary::after{content:"–"}
 /* ---------- config ---------- */
 var FILE_ID="1JMu3SpJi9isgWHkWwGy_b20g4nJV4Fj7gI6vpm6sVUg";
 var SERVER="Google Drive";
+var PUB_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT7lmghpp986jfdOhaZIwObYI9sDo1grSgexGHbk4C5xoAIsxirdsTujiLVV0pFIf-5GTtl7MkPyrdc/pub?output=xlsx";
 var SHEET="ผลการใช้จ่าย";
 var XLSX_MIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 var QTARGET=[33,55,76,93]; /* สำรองเมื่อไม่พบชีต “เกณฑ์เบิกจ่าย” */
@@ -906,13 +907,19 @@ var syncing=false;
 async function syncLive(manual){
   if(syncing)return;syncing=true;document.body.classList.add("busy");setStatus("loading","กำลังซิงก์กับ Google Sheets…");
   try{
-    var mcp=window.claude&&window.claude.use?await window.claude.use("mcp"):null;
-    if(!mcp)throw{code:"unavailable"};
+    var wb;
+    var mcp=null;try{mcp=window.claude&&window.claude.use?await window.claude.use("mcp"):null}catch(_){mcp=null}
+    if(mcp){
     var res;
     try{res=await mcp.callTool(SERVER,"download_file_content",{fileId:FILE_ID,exportMimeType:XLSX_MIME},{cache:false})}
     catch(e){if(e&&e.retryable){await new Promise(function(r){setTimeout(r,e.retryAfterMs||1500)});res=await mcp.callTool(SERVER,"download_file_content",{fileId:FILE_ID,exportMimeType:XLSX_MIME},{cache:false})}else throw e}
     var b64=findB64(res);if(!b64)throw{code:"shape"};
-    var wb=XLSX.read(b64,{type:"base64"});
+    wb=XLSX.read(b64,{type:"base64"});
+    }else{
+    var fr=await fetch(PUB_URL+"&_="+Date.now(),{cache:"no-store"});
+    if(!fr.ok)throw{code:"fetch"};
+    wb=XLSX.read(new Uint8Array(await fr.arrayBuffer()),{type:"array"});
+    }
     applyWorkbook(wb,"live");
     setStatus("live","ซิงก์แล้ว "+stamp(meta.when));
     st.enter=true;render();
@@ -925,6 +932,8 @@ async function syncLive(manual){
 }
 $("#btnSync").addEventListener("click",function(){syncLive(true)});
 var autoT;$("#auto").addEventListener("change",function(e){clearInterval(autoT);var m=+e.target.value;if(m)autoT=setInterval(function(){if(!document.hidden)syncLive(false)},m*60000)});$("#auto").dispatchEvent(new Event("change"));
+$("#btnSync").hidden=false;
+syncLive(false);
 $("#file").addEventListener("change",function(e){
   var f=e.target.files&&e.target.files[0];if(!f)return;
   var fr=new FileReader();
@@ -944,7 +953,7 @@ function header(){return["ลำดับในชีต","รายการ","
 function line(r){return[r.no,disp(r.label),r.sub,OUT[r.out],r.cat,"รายจ่าย"+r.nat,r.b,r.a,r.po,r.exp,r.b-tot(r),+pct(r.a,r.b).toFixed(2),+pct(tot(r),r.b).toFixed(2)]}
 async function save(name,data){
   var dl=window.claude&&window.claude.use?await window.claude.use("downloads"):null;
-  if(!dl){toast("มุมมองนี้ไม่รองรับการดาวน์โหลดไฟล์ ลองเปิดจากหน้าแอป Claude");return false}
+  if(!dl){try{var bl=data instanceof Blob?data:new Blob([data],{type:"text/plain;charset=utf-8"});var u=URL.createObjectURL(bl),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},4000);toast("บันทึกไฟล์แล้ว");return true}catch(_){toast("บันทึกไฟล์ไม่สำเร็จ");return false}}
   try{var r=await dl.save({filename:name,data:data});toast(r.status==="saved"?"บันทึกไฟล์แล้ว":"ส่งไฟล์แล้ว");return true}
   catch(e){if(e&&e.code==="declined")toast("ยกเลิกการบันทึกไฟล์");else toast("บันทึกไฟล์ไม่สำเร็จ ("+(e&&e.code||"error")+")");return false}
 }
