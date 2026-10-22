@@ -1,5 +1,34 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><title>ผลเบิกจ่าย สบน. 2570</title><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>*,*::before,*::after{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer}[hidden]{display:none!important}img{max-width:100%}</style></head><body>
+<html lang="th"><head><meta charset="utf-8"><title>ผลเบิกจ่าย สบน. 2570</title><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>*,*::before,*::after{box-sizing:border-box}body{margin:0}button{font:inherit;cursor:pointer}[hidden]{display:none!important}img{max-width:100%}/* โทนพอร์ทัล: หัวสีน้ำเงินเข้ม การ์ดขาวมุมโค้งเงานุ่ม ปุ่มทรงแคปซูล */
+:root{--bg:#f8faff;--line:#e8edf6;--shadow:0 6px 24px rgba(15,50,110,.07)}
+.top{background:linear-gradient(180deg,#003a75,#0a2f66)}
+.card{border-radius:20px;border-color:#edf1f8;box-shadow:0 6px 24px rgba(15,50,110,.07)}
+.panel>h2:first-child,.panel .tbar>h2,.thead h2{display:flex;align-items:center;gap:12px}
+.panel>h2:first-child::before,.panel .tbar>h2::before,.thead h2::before{content:"";flex:none;width:1.5em;height:1.5em;border-radius:10px;background:linear-gradient(135deg,#4a90e2,#1d5fc2) center/55% no-repeat;box-shadow:0 4px 10px rgba(29,95,194,.25)}
+.panel>h2:first-child::after,.panel .tbar>h2::after,.thead h2::after{content:none}
+.btn{border-radius:999px;padding:9px 20px}
+.btn.primary{background:linear-gradient(135deg,#4a90e2,#1d5fc2);border-color:transparent;box-shadow:0 4px 12px rgba(29,95,194,.25)}
+.top .btn.primary{background:#fff;box-shadow:none}
+.kpi{border-radius:20px}
+/* หัวข้อแบบแถบน้ำเงินเข้ม พับ/ขยายได้ (โทน Green Smart Office) */
+.card.panel,.card.tcard{padding:0;overflow:hidden;border-radius:14px}
+.card.panel>h2:first-child,.card.panel>.tbar:first-child,.card.tcard>.thead:first-child{margin:0;padding:16px 22px;background:#0f2a4a;color:#fff;cursor:pointer;display:flex;align-items:center;gap:12px;border:0;position:relative;user-select:none}
+.card.panel>h2:first-child,.card.panel>.tbar:first-child h2,.card.tcard>.thead h2{color:#fff;font:600 24px/1.3 var(--f-head);margin:0}
+.card.panel>.tbar:first-child{justify-content:space-between;flex-wrap:wrap}
+.card.tcard>.thead:first-child{justify-content:space-between}
+.card.panel>h2:first-child::before,.card.panel>.tbar:first-child h2::before,.card.tcard>.thead h2::before{display:none}
+.card.panel>h2:first-child::after,.card.panel>.tbar:first-child>h2::after,.card.tcard>.thead h2::after{content:"";display:block;margin-left:auto;width:11px;height:11px;border:solid #fff;border-width:2px 0 0 2px;transform:rotate(45deg) translate(3px,3px);transition:transform .2s;flex:none}
+.card.panel>.tbar:first-child>h2{flex:1 1 auto;display:flex;align-items:center}
+.card.collapsed>h2:first-child::after,.card.collapsed>.tbar:first-child>h2::after,.card.collapsed>.thead h2::after{transform:rotate(225deg) translate(3px,3px)}
+.card.panel>.tbar:first-child .btn{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.3);color:#fff;box-shadow:none;padding:6px 16px}
+.card.tcard>.thead:first-child .ks{color:#b9cdf0}
+.card.panel>:not(:first-child){margin-left:18px;margin-right:18px}
+.card.panel>.sub:nth-child(2){margin-top:12px}
+.card.panel>:last-child{margin-bottom:18px}
+.card.panel>:nth-child(2){margin-top:14px}
+.card.collapsed>:not(:first-child){display:none!important}
+.card.collapsed>:first-child{border-radius:0}
+</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap">
@@ -1361,6 +1390,14 @@ drawChips();render();
 setTimeout(function(){$("#splash").classList.add("off")},reduce?0:650);
 setTimeout(function(){if(lkUrl)syncLink(false)},900);
 /* view-only: ไม่เชื่อมฐานข้อมูล */
+})();
+
+(function(){
+  document.addEventListener("click",function(e){
+    var h=e.target.closest(".card.panel>h2:first-child,.card.panel>.tbar:first-child,.card.tcard>.thead:first-child");
+    if(!h||e.target.closest("button,a,input,select,label"))return;
+    h.parentNode.classList.toggle("collapsed");
+  });
 })();
 </script>
 
