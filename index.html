@@ -1351,7 +1351,9 @@ $("#recExp").addEventListener("click",async function(){
 
 /* ---------- อัปเดตจากลิงก์ที่เผยแพร่ไปยังเว็บ ---------- */
 var LKEY="sbn2570_sheet_url",lkUrl="";
+var DEFAULT_LINK="https://docs.google.com/spreadsheets/d/e/2PACX-1vT7lmghpp986jfdOhaZIwObYI9sDo1grSgexGHbk4C5xoAIsxirdsTujiLVV0pFIf-5GTtl7MkPyrdc/pub?output=xlsx";
 try{lkUrl=localStorage.getItem(LKEY)||""}catch(_){lkUrl=""}
+if(!lkUrl)lkUrl=DEFAULT_LINK;
 function lkStore(u){lkUrl=u;try{if(u)localStorage.setItem(LKEY,u);else localStorage.removeItem(LKEY)}catch(_){}}
 function validPubUrl(u){try{var x=new URL(u);return x.protocol==="https:"&&/(^|\.)google\.com$/.test(x.hostname)&&x.pathname.indexOf("/spreadsheets/")===0}catch(_){return false}}
 function linkErr(e){var c=e&&e.code;return c==="nolink"?"ยังไม่ได้ตั้งค่าลิงก์ชีต":c==="badlink"?"ลิงก์ไม่ถูกต้อง ต้องเป็นลิงก์ที่ได้จาก “เผยแพร่ไปยังเว็บ” ของ Google Sheets":c==="http"?"เปิดลิงก์ไม่ได้ (ตรวจว่ายังเผยแพร่ชีตอยู่)":c==="net"?"เชื่อมต่อไม่ได้ ตรวจอินเทอร์เน็ตและว่าเผยแพร่ชีตไปยังเว็บแล้ว":errText(e)}
@@ -1379,7 +1381,7 @@ function openLk(){$("#lkUrl").value=lkUrl;$("#lkMsg").textContent="";$("#lk").hi
 $("#btnLink").addEventListener("click",openLk);
 $("#lkX").addEventListener("click",function(){$("#lk").hidden=true});
 $("#lk").addEventListener("click",function(e){if(e.target===this)this.hidden=true});
-$("#lkClear").addEventListener("click",function(){lkStore("");$("#lkUrl").value="";$("#lkMsg").textContent="ล้างลิงก์แล้ว"});
+$("#lkClear").addEventListener("click",function(){lkStore("");lkUrl=DEFAULT_LINK;$("#lkUrl").value="";$("#lkMsg").textContent="กลับไปใช้ลิงก์เริ่มต้นแล้ว"});
 $("#lkSave").addEventListener("click",async function(){
   var u=$("#lkUrl").value.trim();
   if(!validPubUrl(u)){$("#lkMsg").textContent="ลิงก์ต้องขึ้นต้นด้วย https://docs.google.com/spreadsheets/";return}
