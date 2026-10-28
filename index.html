@@ -54,6 +54,7 @@ body.unitmode .rail,body.unitmode main#report>*:not(#planSec){display:none!impor
 body.unitmode #planSec>h2:first-child{cursor:default}
 .pmeta{color:var(--ink2);font-size:18px;margin:10px 0 0}
 @media (max-width:520px){.pt .pn{min-width:170px}.pkp b{font-size:20px}.pkp{grid-template-columns:1fr 1fr}}
+#btnLink,label[for="file"]{display:none!important}
 </style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1118,7 +1119,7 @@ function parsePlan(wb){
 function pfmt0(n){return (n/1e6).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
 function fyIdx(){var m=new Date().getMonth();return(m+3)%12}
 function planUnits(){var us=[];PLAN.forEach(function(r){if(us.indexOf(r.u)<0)us.push(r.u)});return us}
-function sum(a,to){var s=0;for(var i=0;i<=to&&i<a.length;i++)s+=a[i];return s}
+function psum(a,to){var s=0;for(var i=0;i<=to&&i<a.length;i++)s+=a[i];return s}
 var pState={u:"",m:fyIdx(),locked:false};
 function planUrl(u){var b=location.href.split("#")[0].split("?")[0];return b+"?unit="+encodeURIComponent(u)}
 function drawPlan(){
@@ -1130,8 +1131,8 @@ function drawPlan(){
   su.disabled=pState.locked;
   var rows=PLAN.filter(function(r){return r.u===pState.u}),m=pState.m;
   var tAl=0,tPl=0,tPm=0,tA=0,late=0;
-  rows.forEach(function(r){tAl+=r.al;tPl+=r.pl;tPm+=sum(r.p,m);tA+=sum(r.a,11)});
-  var tAm=rows.reduce(function(s,r){return s+sum(r.a,m)},0);
+  rows.forEach(function(r){tAl+=r.al;tPl+=r.pl;tPm+=psum(r.p,m);tA+=psum(r.a,11)});
+  var tAm=rows.reduce(function(s,r){return s+psum(r.a,m)},0);
   $("#planH").textContent="แผน–ผลการเบิกจ่าย "+(pState.u||"");
   $("#planKpi").innerHTML=
    '<div><small>วงเงินตามแผน (ล้านบาท)</small><b>'+pfmt0(tPl)+'</b></div>'+
@@ -1142,7 +1143,7 @@ function drawPlan(){
    '<div><small>คงเหลือ (ล้านบาท)</small><b>'+pfmt0(tPl-tA)+'</b></div>';
   var h='<table><thead><tr><th>รายการตามแผน</th><th class="r">วงเงิน</th><th class="r">แผนสะสม<br>ถึง '+MON[m]+'</th><th class="r">เบิกแล้ว</th><th class="r">%</th><th style="min-width:110px">ความคืบหน้า</th><th class="r">คงเหลือ</th><th>สถานะ</th></tr></thead><tbody>';
   rows.forEach(function(r){
-    var pm=sum(r.p,m),a=sum(r.a,11),am=sum(r.a,m),lim=r.pl||r.al,st,cl;
+    var pm=psum(r.p,m),a=psum(r.a,11),am=psum(r.a,m),lim=r.pl||r.al,st,cl;
     if(a>lim+0.5){st="เกินวงเงิน";cl="over"}
     else if(pm<=0&&a<=0){st="ยังไม่ถึงแผน";cl="none"}
     else if(am+0.5>=pm){st="ตามแผน";cl="ok"}
@@ -1168,7 +1169,7 @@ function planInit(){
   $("#planX").addEventListener("click",function(){
     var rows=PLAN.filter(function(r){return r.u===pState.u}),m=pState.m;
     var aoa=[["รหัส","รายการ","ประเภท","วงเงินตามแผน"].concat(MON.map(function(t){return"แผน "+t}),MON.map(function(t){return"ผล "+t}),["เบิกแล้ว","คงเหลือ"])];
-    rows.forEach(function(r){var a=sum(r.a,11),lim=r.pl||r.al;aoa.push([r.k,r.n,r.c,lim].concat(r.p,r.a,[a,lim-a]))});
+    rows.forEach(function(r){var a=psum(r.a,11),lim=r.pl||r.al;aoa.push([r.k,r.n,r.c,lim].concat(r.p,r.a,[a,lim-a]))});
     var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),pState.u.slice(0,28)||"แผน");
     XLSX.writeFile(wb,"แผน-ผล_"+pState.u+".xlsx")});
   drawPlan();
