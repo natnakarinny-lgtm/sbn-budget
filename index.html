@@ -55,6 +55,17 @@ body.unitmode #planSec>h2:first-child{cursor:default}
 .pmeta{color:var(--ink2);font-size:18px;margin:10px 0 0}
 @media (max-width:520px){.pt .pn{min-width:170px}.pkp b{font-size:20px}.pkp{grid-template-columns:1fr 1fr}}
 #btnLink,label[for="file"]{display:none!important}
+
+.pt table.sheet{min-width:1500px;font-size:17.5px;border:1px solid #888}
+.sheet th,.sheet td{border:1px solid #9a9a9a;padding:4px 6px;color:#111;background:#fff}
+.sheet thead th{background:#fff;text-align:center;font-weight:700;position:static;white-space:normal}
+.sheet .t1 th{border:0;font-size:21px;padding:4px}
+.sheet td.nm,.sheet th.nm{text-align:left;min-width:300px}.sheet td.nm small{display:block;color:#555;font-size:15px}
+.sheet td.cat{text-align:center;font-weight:600;vertical-align:middle}.sheet td.reg{background:#c6f58e}.sheet td.inv{background:#cdf5f5}
+.sheet td.lb{text-align:center;font-weight:700}.sheet td.p{background:#fdc9a0}.sheet td.a{background:#ffffc4}
+.sheet td.tp{background:#ffff99;font-weight:700}.sheet td.ta{background:#ffd966;font-weight:700}.sheet td.tl{text-align:center;font-weight:700;font-size:20px;vertical-align:middle}
+.sheet td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ph{margin:18px 0 8px;font:600 21px/1.3 var(--f-head);color:var(--ink)}
 </style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -460,7 +471,7 @@ details.dq[open] summary::after{content:"–"}
   </section>
   <section class="card panel" id="planSec"><h2 id="planH">แผน–ผลการเบิกจ่ายรายสำนัก</h2><p class="sub" id="planSub">เลือกสำนักเพื่อดูแผนการใช้จ่ายของสำนักนั้นเทียบกับที่เบิกจ่ายแล้ว</p>
     <div class="pbar"><label for="planUnit">สำนัก/ศูนย์/กลุ่ม</label><select id="planUnit"></select><label for="planMon">ประเมิน ณ สิ้นเดือน</label><select id="planMon"></select></div>
-    <div class="pkp" id="planKpi"></div><div class="pt" id="planTbl"></div><p class="pmeta" id="planNote"></p>
+    <div class="pkp" id="planKpi"></div><h3 class="ph">สรุปความคืบหน้ารายรายการ</h3><div class="pt" id="planSum"></div><h3 class="ph">ตารางแผน–ผลรายเดือน (แบบชีต)</h3><div class="pt" id="planTbl"></div><p class="pmeta" id="planNote"></p>
     <div class="plnk"><a class="btn" id="planBack" href="./" hidden>← กลับหน้ารวม</a><button class="btn" id="planCopy" type="button">คัดลอกลิงก์หน้านี้ของสำนัก</button><button class="btn" id="planX" type="button">ส่งออก Excel</button><span class="pmeta" id="planCopied" style="margin:0"></span></div>
   </section>
   <section class="card panel" id="unitSec"><h2>ผลเบิกจ่ายรายสำนัก / ศูนย์ / กลุ่ม</h2><p class="sub" id="unitSub"></p>
@@ -1121,6 +1132,115 @@ function fyIdx(){var m=new Date().getMonth();return(m+3)%12}
 function planUnits(){var us=[];PLAN.forEach(function(r){if(us.indexOf(r.u)<0)us.push(r.u)});return us}
 function psum(a,to){var s=0;for(var i=0;i<=to&&i<a.length;i++)s+=a[i];return s}
 var pState={u:"",m:fyIdx(),locked:false};
+
+var QN=["ไตรมาส 1","ไตรมาส 2","ไตรมาส 3","ไตรมาส 4"];
+function nz(v){return v?Math.round(v).toLocaleString("en-US"):""}
+function nd(v){return v?Math.round(v).toLocaleString("en-US"):"-"}
+function sheetTitle(){return["แผนการปฏิบัติงานและแผนการเบิกจ่ายงบประมาณ ประจำปีงบประมาณ พ.ศ. 2570",pState.u]}
+function sheetHtml(rows){
+  var T=function(v,c){return'<td class="sh '+(c||"")+'">'+v+'</td>'};
+  var h='<table class="sheet"><thead><tr class="t1"><th colspan="19">'+esc(sheetTitle()[0])+'</th></tr><tr class="t1"><th colspan="19">'+esc(sheetTitle()[1])+'</th></tr>'+
+   '<tr><th rowspan="2">ประเภท<br>ของรายจ่าย</th><th rowspan="2" class="nm">โครงการ/รายการ</th><th rowspan="2">แผน/ผล</th><th rowspan="2">ได้รับจัดสรร</th><th rowspan="2">วงเงินทำแผน<br>(บาท)</th>'+
+   QN.map(function(q){return'<th colspan="3">'+q+'</th>'}).join("")+'<th rowspan="2">รวม</th><th rowspan="2">ร้อยละ<br>ผล/แผน</th></tr><tr>'+MON.map(function(t){return'<th>'+t+'</th>'}).join("")+'</tr></thead><tbody>';
+  var tp=new Array(12).fill(0),ta=new Array(12).fill(0),tAl=0,tPl=0;
+  rows.forEach(function(r){
+    var pt=psum(r.p,11),at=psum(r.a,11),cl=r.c==="ลงทุน"?"inv":"reg",lim=r.pl||r.al;tAl+=r.al;tPl+=lim;
+    r.p.forEach(function(v,i){tp[i]+=v});r.a.forEach(function(v,i){ta[i]+=v});
+    h+='<tr class="pr"><td rowspan="2" class="sh cat '+cl+'">'+esc(r.c)+'</td><td rowspan="2" class="sh nm">'+esc(r.n||"—")+(r.k?'<small>'+esc(r.k)+'</small>':'')+'</td>'+T("แผน","lb p")+T(nz(r.al),"n p")+T(nz(lim),"n p")+r.p.map(function(v){return T(nz(v),"n p")}).join("")+T(nz(pt),"n p")+T("","n p")+'</tr>'+
+     '<tr class="rr">'+T("ผล","lb a")+T(nd(0),"n a")+T(nd(0),"n a")+r.a.map(function(v){return T(nd(v),"n a")}).join("")+T(nd(at),"n a")+T(lim>0?(at/lim*100).toFixed(2)+"%":"-","n a")+'</tr>';
+  });
+  var pT=psum(tp,11),aT=psum(ta,11);
+  h+='<tr class="pr tot"><td class="sh"></td><td rowspan="2" class="sh nm tl">รวมทั้งสิ้น</td>'+T("แผน","lb tp")+T(nz(tAl),"n tp")+T(nz(tPl),"n tp")+tp.map(function(v){return T(nd(v),"n tp")}).join("")+T(nd(pT),"n tp")+T("","n tp")+'</tr>'+
+   '<tr class="rr tot"><td class="sh"></td>'+T("ผล","lb ta")+T("-","n ta")+T("-","n ta")+ta.map(function(v){return T(nd(v),"n ta")}).join("")+T(nd(aT),"n ta")+T(tPl>0?(aT/tPl*100).toFixed(2)+"%":"-","n ta")+'</tr></tbody></table>';
+  return h;
+}
+
+/* ---- ตัวสร้างไฟล์ .xlsx แบบมีสี (เขียนเอง ไม่พึ่งไลบรารี) ---- */
+var CRCT=null;
+function crc32(u8){if(!CRCT){CRCT=[];for(var n=0;n<256;n++){var c=n;for(var k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;CRCT[n]=c>>>0}}
+  var c=0xFFFFFFFF;for(var i=0;i<u8.length;i++)c=CRCT[(c^u8[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0}
+function zipStore(files){
+  var enc=new TextEncoder(),parts=[],cd=[],off=0;
+  function u16(v){return[v&255,v>>>8&255]}function u32(v){return[v&255,v>>>8&255,v>>>16&255,v>>>24&255]}
+  files.forEach(function(f){
+    var nm=enc.encode(f.name),d=enc.encode(f.data),crc=crc32(d);
+    var lh=[].concat(u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(crc),u32(d.length),u32(d.length),u16(nm.length),u16(0));
+    parts.push(new Uint8Array(lh),nm,d);
+    cd.push([].concat(u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0x21),u32(crc),u32(d.length),u32(d.length),u16(nm.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off)),Array.prototype.slice.call(nm));
+    off+=lh.length+nm.length+d.length});
+  var cdl=0;cd.forEach(function(x){parts.push(new Uint8Array(x));cdl+=x.length});
+  parts.push(new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cdl),u32(off),u16(0))));
+  return new Blob(parts,{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+}
+function xe(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function colL(n){var s="";while(n>0){var m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-m-1)/26}return s}
+function XSheet(){this.cells={};this.merges=[];this.widths=[];this.heights={};this.xf=[];this.xfIdx={}}
+var XFILL={none:0,p:2,a:3,reg:4,inv:5,tot:6,tota:7};
+XSheet.prototype.style=function(o){var k=JSON.stringify(o);if(this.xfIdx[k]===undefined){this.xfIdx[k]=this.xf.length+1;this.xf.push(o)}return this.xfIdx[k]};
+XSheet.prototype.set=function(r,c,v,o){this.cells[r+","+c]={v:v,s:this.style(o||{})}};
+XSheet.prototype.merge=function(r1,c1,r2,c2){this.merges.push(colL(c1)+r1+":"+colL(c2)+r2)};
+XSheet.prototype.files=function(sheetName){
+  var self=this,maxR=0,maxC=0;Object.keys(this.cells).forEach(function(k){var p=k.split(",");maxR=Math.max(maxR,+p[0]);maxC=Math.max(maxC,+p[1])});
+  var rows="";
+  for(var r=1;r<=maxR;r++){var cs="";
+    for(var c=1;c<=maxC;c++){var x=this.cells[r+","+c];if(!x)continue;var ref=colL(c)+r;
+      if(typeof x.v==="number")cs+='<c r="'+ref+'" s="'+x.s+'"><v>'+x.v+'</v></c>';
+      else if(x.v===null||x.v==="")cs+='<c r="'+ref+'" s="'+x.s+'"/>';
+      else cs+='<c r="'+ref+'" s="'+x.s+'" t="inlineStr"><is><t xml:space="preserve">'+xe(x.v)+'</t></is></c>'}
+    if(cs)rows+='<row r="'+r+'"'+(this.heights[r]?' ht="'+this.heights[r]+'" customHeight="1"':'')+'>'+cs+'</row>'}
+  var cols='<cols>'+this.widths.map(function(w,i){return'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>'}).join("")+'</cols>';
+  var sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0" showGridLines="0"><pane xSplit="3" ySplit="5" topLeftCell="D6" activePane="bottomRight" state="frozen"/></sheetView></sheetViews><sheetFormatPr defaultRowHeight="18"/>'+cols+'<sheetData>'+rows+'</sheetData>'+(this.merges.length?'<mergeCells count="'+this.merges.length+'">'+this.merges.map(function(m){return'<mergeCell ref="'+m+'"/>'}).join("")+'</mergeCells>':'')+'<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToHeight="0"/></worksheet>';
+  var fills=['<fill><patternFill patternType="none"/></fill>','<fill><patternFill patternType="gray125"/></fill>'].concat(["FDC9A0","FFFFC4","C6F58E","CDF5F5","FFFF99","FFD966"].map(function(c){return'<fill><patternFill patternType="solid"><fgColor rgb="FF'+c+'"/><bgColor indexed="64"/></patternFill></fill>'}));
+  var xfs='<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'+this.xf.map(function(o){
+    var al='<alignment'+(o.h?' horizontal="'+o.h+'"':'')+' vertical="'+(o.v||"center")+'"'+(o.w?' wrapText="1"':'')+'/>';
+    return'<xf numFmtId="'+(o.nf||0)+'" fontId="'+(o.b?(o.big?2:1):0)+'" fillId="'+(XFILL[o.f]||0)+'" borderId="'+(o.bd?1:0)+'" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1">'+al+'</xf>'}).join("");
+  var styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="2"><numFmt numFmtId="164" formatCode="#,##0;\\-#,##0;&quot;-&quot;"/><numFmt numFmtId="165" formatCode="0.00&quot;%&quot;"/></numFmts><fonts count="3"><font><sz val="13"/><color rgb="FF000000"/><name val="TH Sarabun New"/></font><font><b/><sz val="13"/><color rgb="FF000000"/><name val="TH Sarabun New"/></font><font><b/><sz val="15"/><color rgb="FF000000"/><name val="TH Sarabun New"/></font></fonts><fills count="'+fills.length+'">'+fills.join("")+'</fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FF8C8C8C"/></left><right style="thin"><color rgb="FF8C8C8C"/></right><top style="thin"><color rgb="FF8C8C8C"/></top><bottom style="thin"><color rgb="FF8C8C8C"/></bottom><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="'+(this.xf.length+1)+'">'+xfs+'</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+  var nm=xe(sheetName.replace(/[\\\/\?\*\[\]:]/g,"").slice(0,31)||"แผน");
+  return[
+   {name:"[Content_Types].xml",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'},
+   {name:"_rels/.rels",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+   {name:"xl/workbook.xml",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="'+nm+'" sheetId="1" r:id="rId1"/></sheets></workbook>'},
+   {name:"xl/_rels/workbook.xml.rels",data:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
+   {name:"xl/styles.xml",data:styles},{name:"xl/worksheets/sheet1.xml",data:sheet}];
+};
+function sheetXlsx(rows){
+  var X=new XSheet(),NF=164,PC=165;
+  X.widths=[11,46,7,14,14].concat(new Array(12).fill(11),[14,11]);
+  X.set(1,1,sheetTitle()[0],{b:1,big:1,h:"center"});X.set(2,1,sheetTitle()[1],{b:1,big:1,h:"center"});X.merge(1,1,1,19);X.merge(2,1,2,19);
+  var hs={b:1,bd:1,h:"center",w:1};
+  function hd(r1,c1,r2,c2,v){for(var r=r1;r<=r2;r++)for(var c=c1;c<=c2;c++)X.set(r,c,r===r1&&c===c1?v:"",hs);if(r1!==r2||c1!==c2)X.merge(r1,c1,r2,c2)}
+  hd(4,1,5,1,"ประเภท\nของรายจ่าย");hd(4,2,5,2,"โครงการ/รายการ");hd(4,3,5,3,"แผน/ผล");hd(4,4,5,4,"ได้รับจัดสรร");hd(4,5,5,5,"วงเงินทำแผน\n(บาท)");
+  for(var q=0;q<4;q++)hd(4,6+q*3,4,8+q*3,QN[q]);
+  for(var i=0;i<12;i++)X.set(5,6+i,MON[i],hs);
+  hd(4,18,5,18,"รวม");hd(4,19,5,19,"ร้อยละ\nผล/แผน");
+  var row=6,tp=new Array(12).fill(0),ta=new Array(12).fill(0),tAl=0,tPl=0;
+  function line(r,lab,al,pl,arr,tot,pc,kind,blankZero){
+    X.set(r,3,lab,{b:1,bd:1,h:"center",f:kind});X.set(r,4,al,{bd:1,nf:NF,f:kind,h:"right"});X.set(r,5,pl,{bd:1,nf:NF,f:kind,h:"right"});
+    arr.forEach(function(v,i){X.set(r,6+i,blankZero&&!v?null:v,{bd:1,nf:NF,f:kind,h:"right"})});
+    X.set(r,18,tot,{bd:1,nf:NF,f:kind,h:"right"});X.set(r,19,pc,{bd:1,nf:PC,f:kind,h:"right"})}
+  rows.forEach(function(r){
+    var lim=r.pl||r.al,pt=psum(r.p,11),at=psum(r.a,11);tAl+=r.al;tPl+=lim;r.p.forEach(function(v,i){tp[i]+=v});r.a.forEach(function(v,i){ta[i]+=v});
+    line(row,"แผน",r.al,lim,r.p,pt,null,"p",true);line(row+1,"ผล",0,0,r.a,at,lim>0?at/lim*100:0,"a",false);
+    X.set(row,1,r.c,{bd:1,h:"center",f:r.c==="ลงทุน"?"inv":"reg"});X.set(row+1,1,"",{bd:1,f:r.c==="ลงทุน"?"inv":"reg"});X.merge(row,1,row+1,1);
+    X.set(row,2,(r.n||"")+(r.k?"\n("+r.k+")":""),{bd:1,w:1,h:"left"});X.set(row+1,2,"",{bd:1});X.merge(row,2,row+1,2);
+    X.heights[row]=36;row+=2});
+  line(row,"แผน",tAl,tPl,tp,psum(tp,11),null,"tot",false);line(row+1,"ผล",0,0,ta,psum(ta,11),tPl>0?psum(ta,11)/tPl*100:0,"tota",false);
+  X.set(row,1,"รวมทั้งสิ้น",{b:1,big:1,bd:1,h:"center"});X.set(row,2,"",{bd:1});X.set(row+1,1,"",{bd:1});X.set(row+1,2,"",{bd:1});X.merge(row,1,row+1,2);
+  var blob=zipStore(X.files(pState.u||"แผน")),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="แผน-ผล_"+pState.u+".xlsx";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
+  return true;
+}
+
+function summaryHtml(rows,m,stOf){
+  var h='<table><thead><tr><th>รายการตามแผน</th><th class="r">วงเงิน</th><th class="r">แผนสะสม<br>ถึง '+MON[m]+'</th><th class="r">เบิกแล้ว</th><th class="r">%</th><th style="min-width:110px">ความคืบหน้า</th><th class="r">คงเหลือ</th><th>สถานะ</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var pm=psum(r.p,m),a=psum(r.a,11),lim=r.pl||r.al,st=stOf(r);
+    var w=lim>0?Math.min(a/lim*100,100):0,mk=lim>0?Math.min(pm/lim*100,100):0;
+    h+='<tr><td class="pn">'+esc(r.n||"—")+'<small>'+esc((r.c?r.c+" · ":"")+(r.k||""))+'</small></td><td class="r">'+full(lim)+'</td><td class="r">'+full(pm)+'</td><td class="r">'+full(a)+'</td><td class="r">'+pf(pct(a,lim))+'</td><td><span class="pg"><i style="width:'+w.toFixed(1)+'%"></i><u style="left:'+mk.toFixed(1)+'%"></u></span></td><td class="r">'+full(lim-a)+'</td><td><span class="tag '+st[1]+'">'+st[0]+'</span></td></tr>';
+  });
+  if(!rows.length)h+='<tr><td colspan="8">ยังไม่มีรายการแผนของสำนักนี้</td></tr>';
+  return h+'</tbody></table>';
+}
 function planUrl(u){var b=location.href.split("#")[0].split("?")[0];return b+"?unit="+encodeURIComponent(u)}
 function drawPlan(){
   var sec=$("#planSec");if(!sec)return;
@@ -1141,18 +1261,11 @@ function drawPlan(){
    '<div><small>แผนสะสมถึง '+MON[m]+' (ล้านบาท)</small><b>'+pfmt0(tPm)+'</b></div>'+
    '<div><small>เบิกได้เทียบแผนสะสม</small><b>'+(tPm>0?pf(pct(tAm,tPm)):"—")+'</b></div>'+
    '<div><small>คงเหลือ (ล้านบาท)</small><b>'+pfmt0(tPl-tA)+'</b></div>';
-  var h='<table><thead><tr><th>รายการตามแผน</th><th class="r">วงเงิน</th><th class="r">แผนสะสม<br>ถึง '+MON[m]+'</th><th class="r">เบิกแล้ว</th><th class="r">%</th><th style="min-width:110px">ความคืบหน้า</th><th class="r">คงเหลือ</th><th>สถานะ</th></tr></thead><tbody>';
-  rows.forEach(function(r){
-    var pm=psum(r.p,m),a=psum(r.a,11),am=psum(r.a,m),lim=r.pl||r.al,st,cl;
-    if(a>lim+0.5){st="เกินวงเงิน";cl="over"}
-    else if(pm<=0&&a<=0){st="ยังไม่ถึงแผน";cl="none"}
-    else if(am+0.5>=pm){st="ตามแผน";cl="ok"}
-    else{st="ล่าช้ากว่าแผน";cl="late";late++}
-    var w=lim>0?Math.min(a/lim*100,100):0,mk=lim>0?Math.min(pm/lim*100,100):0;
-    h+='<tr><td class="pn">'+esc(r.n||"—")+'<small>'+esc((r.c?r.c+" · ":"")+(r.k||""))+'</small></td><td class="r">'+full(lim)+'</td><td class="r">'+full(pm)+'</td><td class="r">'+full(a)+'</td><td class="r">'+pf(pct(a,lim))+'</td><td><span class="pg"><i style="width:'+w.toFixed(1)+'%"></i><u style="left:'+mk.toFixed(1)+'%"></u></span></td><td class="r">'+full(lim-a)+'</td><td><span class="tag '+cl+'">'+st+'</span></td></tr>';
-  });
-  if(!rows.length)h+='<tr><td colspan="8">ยังไม่มีรายการแผนของสำนักนี้</td></tr>';
-  $("#planTbl").innerHTML=h+'</tbody></table>';
+  var late=0,stOf=function(r){var pm=psum(r.p,m),a=psum(r.a,11),am=psum(r.a,m),lim=r.pl||r.al;
+    if(a>lim+0.5)return["เกินวงเงิน","over"];if(pm<=0&&a<=0)return["ยังไม่ถึงแผน","none"];if(am+0.5>=pm)return["ตามแผน","ok"];return["ล่าช้ากว่าแผน","late"]};
+  rows.forEach(function(r){if(stOf(r)[1]==="late")late++});
+  $("#planSum").innerHTML=summaryHtml(rows,m,stOf);
+  $("#planTbl").innerHTML=sheetHtml(rows);
   $("#planNote").textContent="เส้นสีส้มบนแถบ = ตำแหน่งแผนสะสมถึง "+MON[m]+" · "+(late?late+" รายการล่าช้ากว่าแผน":"ไม่มีรายการล่าช้ากว่าแผน")+" · ยอดเบิกจ่ายมาจากชีต INPUT ผ่านรหัสรายการ";
   $("#planBack").hidden=!pState.locked;
 }
@@ -1168,6 +1281,7 @@ function planInit(){
     try{navigator.clipboard.writeText(url).then(ok,no)}catch(_){no()}});
   $("#planX").addEventListener("click",function(){
     var rows=PLAN.filter(function(r){return r.u===pState.u}),m=pState.m;
+    if(sheetXlsx(rows))return;
     var aoa=[["รหัส","รายการ","ประเภท","วงเงินตามแผน"].concat(MON.map(function(t){return"แผน "+t}),MON.map(function(t){return"ผล "+t}),["เบิกแล้ว","คงเหลือ"])];
     rows.forEach(function(r){var a=psum(r.a,11),lim=r.pl||r.al;aoa.push([r.k,r.n,r.c,lim].concat(r.p,r.a,[a,lim-a]))});
     var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),pState.u.slice(0,28)||"แผน");
