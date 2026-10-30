@@ -75,7 +75,7 @@ body.unitmode #planSec>h2:first-child{cursor:default}
 #sideNav a{display:block;padding:9px 12px;border-radius:10px;border-left:4px solid transparent;color:var(--ink2);text-decoration:none;font-size:22px;line-height:1.3;cursor:pointer}
 #sideNav a:hover{background:var(--accent-soft);color:var(--ink)}
 #sideNav a.on{background:var(--accent-soft);border-left-color:var(--accent);color:var(--ink);font-weight:700}
-#report>.card,#report .panels>.card,#report .ccards,#report .kpis{scroll-margin-top:var(--navoff,90px)}
+#report>.card,#report .panels>.card,#report .ccards,#report .cc-head,#report .kpis{scroll-margin-top:var(--navoff,90px)}
 @media (min-width:1100px){
   .wrap.hasnav{display:grid;grid-template-columns:220px minmax(0,1fr);gap:22px;align-items:start}
   body.hasnav .wrap{max-width:1500px}
@@ -123,6 +123,33 @@ body.unitmode .hero-txt p,body.unitmode .herobtn{display:none}
 /* กว้างเต็มจอ */
 .wrap,body.hasnav .wrap{max-width:1880px;padding-inline:clamp(16px,2.2vw,44px)}
 @media (min-width:1100px){.wrap.hasnav{grid-template-columns:240px minmax(0,1fr)}}
+
+/* การ์ดหมวดงบ 4 ใบต่อแถว */
+@media (min-width:1250px){
+  #report .ccards{grid-template-columns:repeat(4,minmax(0,1fr))}
+  #report .ccard dl{grid-template-columns:minmax(0,1fr);gap:0}
+  #report .ccard dt{font-size:20px;margin-top:6px}
+  #report .ccard dd{text-align:left;font-size:22px}
+  #report .ccard dd.big{font-size:24px}
+  #report .ccard .ctop{gap:12px}
+  #report .ccard .cname{font-size:25px}
+  #report .ccard .cshare{font-size:19px}
+}
+
+/* ปรับตามคอมเมนต์ */
+#report .goldbar.card.panel>h2:first-child{background:#f2a516;color:#2a1800}
+#report .goldbar.card.panel>h2:first-child::after{border-color:#2a1800;margin-left:0}
+.goldbar>h2 .hsum{margin-left:auto;margin-right:16px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:22px;background:rgba(42,24,0,.12);border-radius:999px;padding:2px 14px}
+
+
+
+#bnSub{display:none!important}
+#planSum th{text-align:center;vertical-align:middle}
+#planSum th:first-child{text-align:left}
+#planSum td.r,#planSum td:last-child,#planSum td:nth-last-child(2){text-align:center}
+@media (min-width:1100px){
+  #sideNav{border:2px solid transparent;background:linear-gradient(var(--surface),var(--surface)) padding-box,linear-gradient(180deg,#0b2a5b 0%,#2f6fcf 55%,#bcd3f5 100%) border-box}
+}
 </style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -495,7 +522,7 @@ details.dq[open] summary::after{content:"–"}
   <div class="progress" aria-hidden="true"><i></i></div>
 </header>
 
-<section class="hero" id="hero"><div class="wrap"><div class="hero-in"><div class="hero-txt"><small>สำนักงานบริหารหนี้สาธารณะ</small><h2 id="heroH">ผลเบิกจ่ายงบประมาณรายจ่าย<br>ประจำปี พ.ศ. 2570</h2><p>ติดตามผลการเบิกจ่ายเทียบวงเงินและแผน ครบทุกสำนัก ทุกผลผลิต</p><button class="herobtn" type="button" id="heroGo">ดูรายละเอียดทั้งหมด</button></div><div id="heroK"></div></div></div></section>
+<section class="hero" id="hero"><div class="wrap"><div class="hero-in"><div class="hero-txt"><small>สำนักงานบริหารหนี้สาธารณะ</small><h2 id="heroH">ผลเบิกจ่ายงบประมาณรายจ่าย<br>ประจำปี พ.ศ. 2570</h2></div><div id="heroK"></div></div></div></section>
 <section class="rail" aria-label="ตัวกรอง">
   <div class="wrap">
     <div class="frow"><span class="flabel">ผลผลิต</span><div class="chips" id="fOut"></div></div>
@@ -510,7 +537,7 @@ details.dq[open] summary::after{content:"–"}
       <button class="btn" id="xXlsx" type="button">Excel</button>
       <button class="btn" id="xCsv" type="button">CSV</button>
       <button class="btn" id="xPdf" type="button">PDF</button>
-      <a class="btn" id="xSheet" href="https://docs.google.com/spreadsheets/d/1JMu3SpJi9isgWHkWwGy_b20g4nJV4Fj7gI6vpm6sVUg/edit" target="_blank" rel="noopener noreferrer" style="text-decoration:none">เปิดข้อมูลดิบใน Google Sheets</a>
+      <a class="btn" id="xSheet" href="https://docs.google.com/spreadsheets/d/1JMu3SpJi9isgWHkWwGy_b20g4nJV4Fj7gI6vpm6sVUg/edit" target="_blank" rel="noopener noreferrer" style="text-decoration:none">ข้อมูล Google Sheet</a>
     </div>
   </div>
 </section>
@@ -529,16 +556,16 @@ details.dq[open] summary::after{content:"–"}
   </section>
   <section class="card panel" id="planSec"><h2 id="planH">แผน–ผลการเบิกจ่ายรายสำนัก</h2><p class="sub" id="planSub">เลือกสำนักเพื่อดูแผนการใช้จ่ายของสำนักนั้นเทียบกับที่เบิกจ่ายแล้ว</p>
     <div class="pbar"><label for="planUnit">สำนัก/ศูนย์/กลุ่ม</label><select id="planUnit"></select><label for="planMon">ประเมิน ณ สิ้นเดือน</label><select id="planMon"></select></div>
-    <div class="pkp" id="planKpi"></div><h3 class="ph">สรุปความคืบหน้ารายรายการ</h3><div class="pt" id="planSum"></div><h3 class="ph">ตารางแผน–ผลรายเดือน (แบบชีต)</h3><div class="pt" id="planTbl"></div><p class="pmeta" id="planNote"></p>
+    <div class="pkp" id="planKpi"></div><h3 class="ph">สรุปความคืบหน้ารายรายการ</h3><div class="pt" id="planSum"></div><h3 class="ph">ตารางแผน–ผลรายเดือน</h3><div class="pt" id="planTbl"></div><p class="pmeta" id="planNote"></p>
     <div class="plnk"><a class="btn" id="planBack" href="./" hidden>← กลับหน้ารวม</a><button class="btn" id="planCopy" type="button">คัดลอกลิงก์หน้านี้ของสำนัก</button><button class="btn" id="planX" type="button">ส่งออก Excel</button><span class="pmeta" id="planCopied" style="margin:0"></span></div>
   </section>
   <section class="card panel" id="unitSec"><h2>ผลเบิกจ่ายรายสำนัก / ศูนย์ / กลุ่ม</h2><p class="sub" id="unitSub"></p>
     <div class="uwrap"><div class="ul" id="unitList"></div><div class="udet" id="unitDet"></div></div></section>
-  <section class="card panel"><h2>รายละเอียดรายการที่คาดว่าจะเบิก</h2><p class="sub">ดึงจากชีต “คาดว่าจะเบิก” แสดงยอดและหมายเหตุของแต่ละรายการ ตามตัวกรองที่เลือก</p><div class="xd" id="expDet"></div></section>
+  <section class="card panel"><h2>รายละเอียดรายการที่คาดว่าจะเบิก</h2><div class="xd" id="expDet"></div></section>
   <section class="card panel"><h2>เกณฑ์เบิกจ่ายของกรมบัญชีกลาง เทียบประมาณการและผลจริง</h2><p class="sub" id="bnSub"></p><div class="bnote" id="bnNote"></div><div class="chw" id="chBench"></div>
     <div class="legend lgd"><span><i class="bk"></i>เกณฑ์เบิกจ่าย บก (สะสม)</span><span><i class="es"></i>ประมาณการ สบน. (สะสม)</span><span><i class="ac"></i>ผลจริง รวม PO (ไตรมาสปัจจุบัน)</span></div>
     <div class="bt" id="bnTbl"></div></section>
-  <section class="card panel"><h2>วงเงินแบ่งตามการใช้จ่าย และเงินคาดว่าจะเหลือจ่าย</h2><p class="sub">แท่งเต็ม = วงเงินของแต่ละหมวด แบ่งเป็นเบิกจ่ายแล้ว คาดว่าจะเบิก และคาดว่าจะเหลือจ่าย</p><div class="comp" id="chComp"></div>
+  <section class="card panel"><h2>วงเงินแบ่งตามการใช้จ่าย และเงินคาดว่าจะเหลือจ่าย</h2><div class="comp" id="chComp"></div>
     <div class="legend lgd"><span><i class="sp"></i>เบิกจ่ายแล้ว (รวม PO)</span><span><i class="ex"></i>คาดว่าจะเบิก</span><span><i class="rm"></i>คาดว่าจะเหลือจ่าย</span></div></section>
   <section class="card panel"><div class="tbar"><h2>รายการย่อยแบบลำดับชั้น</h2><div class="tbar"><button class="btn" type="button" data-trall="1">ขยายทั้งหมด</button><button class="btn" type="button" data-trall="0">ย่อทั้งหมด</button></div></div>
     <p class="sub">ผลผลิต › งบรายจ่าย › ประเภท › รายการ กดแถวเพื่อขยาย/ย่อ ตัวเลขเปลี่ยนตามตัวกรองด้านบน</p><div class="trw"><div class="tr" id="tree"></div></div></section>
@@ -893,7 +920,7 @@ function render(){
   $("#scope").innerHTML="<span>ขอบเขต</span>"+scopeText().map(function(t){return"<b>"+esc(t)+"</b>"}).join('<span aria-hidden="true">·</span>');
   drawKPIs(list);drawOut();drawCat();drawCharts();drawExpDet();drawBench();drawTree();drawUnits();drawTop(list);drawTable(list);drawDQ();
   var nrec=dDaily.length+Object.keys(dExp).length;
-  $("#foot").textContent=meta.note+(meta.when?" · อัปเดตล่าสุด "+stamp(meta.when):"")+(nrec?" · รวมรายการที่บันทึกในแดชบอร์ด "+nrec+" รายการ":"");
+  $("#foot").textContent=meta.note+(meta.when?" · อัปเดตล่าสุด "+stamp(meta.when):"")+(nrec?" · รวมรายการที่บันทึกในแดชบอร์ด "+nrec+" รายการ":"")+" · ติดต่อส่วนงานคลัง";
   st.enter=false;
 }
 
@@ -993,6 +1020,8 @@ function parseExpSheet(wb){
 function drawExpDet(){
   var el=$("#expDet");if(!el)return;
   var list=sel().filter(function(r){return r.exp>0||(r.det&&r.det.length)}).sort(function(a,b){return b.exp-a.exp});
+  (function(){var c=el.closest(".card"),h=c&&c.querySelector(":scope>h2");if(!h)return;var t=list.reduce(function(x,r){return x+r.exp},0);
+    h.innerHTML='รายละเอียดรายการที่คาดว่าจะเบิก<span class="hsum">รวม '+nf2.format(t)+' บาท</span>'})();
   if(!list.length){el.innerHTML='<div class="chempty">ยังไม่มีรายการที่คาดว่าจะเบิกในขอบเขตที่เลือก</div>';return}
   var t=0;
   el.innerHTML=list.map(function(r){t+=r.exp;
@@ -1145,7 +1174,7 @@ function drawUnitDet(L,tot){
   var el=$("#unitDet");if(!el)return;
   var u=st.unit,ls=L.filter(function(l){return l.u===u}).sort(function(a,b){return b.a-a.a});
   var rs=sel(),sa=rs.reduce(function(s,r){return s+r.sa},0),da=rs.reduce(function(s,r){return s+r.da},0),note="";
-  if(!st.q){note=Math.abs(tot-sa)<1?"ยอดรวมทุกสำนักตรงกับเบิกจ่ายจริงในชีต “ผลการใช้จ่าย” ("+money(sa)+")":"ยอดรวมทุกสำนัก "+money(tot)+" ต่างจากเบิกจ่ายจริงในชีต “ผลการใช้จ่าย” "+money(sa)+" อยู่ "+money(Math.abs(tot-sa))+" ควรตรวจรายการในชีต INPUT"}
+  if(!st.q){note=Math.abs(tot-sa)<1?"":"ยอดรวมทุกสำนัก "+money(tot)+" ต่างจากเบิกจ่ายจริงในชีต “ผลการใช้จ่าย” "+money(sa)+" อยู่ "+money(Math.abs(tot-sa))+" ควรตรวจรายการในชีต INPUT"}
   if(da>0)note+=(note?" · ":"")+"ยอดที่บันทึกผ่านแดชบอร์ด "+money(da)+" ยังไม่ระบุสำนัก จึงไม่รวมในตารางนี้";
   if(!ls.length){el.innerHTML='<div class="chempty">'+esc(u||"—")+' ยังไม่มีรายการเบิกจ่ายในขอบเขตที่เลือก</div><div class="unote">'+esc(note)+'</div>';return}
   var s=ls.reduce(function(x,l){return x+l.a},0),h='<div class="uh"><h3>'+esc(u)+'</h3><span class="num" style="font-weight:700;font-size:24px">'+money(s)+'</span></div><div class="unote">'+ls.length+' รายการ · '+pf(pct(s,tot))+' ของยอดรวมรายสำนัก</div>';
@@ -1203,7 +1232,7 @@ function sheetHtml(rows){
   rows.forEach(function(r){
     var pt=psum(r.p,11),at=psum(r.a,11),cl=r.c==="ลงทุน"?"inv":"reg",lim=r.pl||r.al;tAl+=r.al;tPl+=lim;
     r.p.forEach(function(v,i){tp[i]+=v});r.a.forEach(function(v,i){ta[i]+=v});
-    h+='<tr class="pr"><td rowspan="2" class="sh cat '+cl+'">'+esc(r.c)+'</td><td rowspan="2" class="sh nm">'+esc(r.n||"—")+(r.k?'<small>'+esc(r.k)+'</small>':'')+'</td>'+T("แผน","lb p")+T(nz(r.al),"n p")+T(nz(lim),"n p")+r.p.map(function(v){return T(nz(v),"n p")}).join("")+T(nz(pt),"n p")+T("","n p")+'</tr>'+
+    h+='<tr class="pr"><td rowspan="2" class="sh cat '+cl+'">'+esc(r.c)+'</td><td rowspan="2" class="sh nm">'+esc(r.n||"—")+'</td>'+T("แผน","lb p")+T(nz(r.al),"n p")+T(nz(lim),"n p")+r.p.map(function(v){return T(nz(v),"n p")}).join("")+T(nz(pt),"n p")+T("","n p")+'</tr>'+
      '<tr class="rr">'+T("ผล","lb a")+T(nd(0),"n a")+T(nd(0),"n a")+r.a.map(function(v){return T(nd(v),"n a")}).join("")+T(nd(at),"n a")+T(lim>0?(at/lim*100).toFixed(2)+"%":"-","n a")+'</tr>';
   });
   var pT=psum(tp,11),aT=psum(ta,11);
@@ -1279,7 +1308,7 @@ function sheetXlsx(rows){
     var lim=r.pl||r.al,pt=psum(r.p,11),at=psum(r.a,11);tAl+=r.al;tPl+=lim;r.p.forEach(function(v,i){tp[i]+=v});r.a.forEach(function(v,i){ta[i]+=v});
     line(row,"แผน",r.al,lim,r.p,pt,null,"p",true);line(row+1,"ผล",0,0,r.a,at,lim>0?at/lim*100:0,"a",false);
     X.set(row,1,r.c,{bd:1,h:"center",f:r.c==="ลงทุน"?"inv":"reg"});X.set(row+1,1,"",{bd:1,f:r.c==="ลงทุน"?"inv":"reg"});X.merge(row,1,row+1,1);
-    X.set(row,2,(r.n||"")+(r.k?"\n("+r.k+")":""),{bd:1,w:1,h:"left"});X.set(row+1,2,"",{bd:1});X.merge(row,2,row+1,2);
+    X.set(row,2,(r.n||""),{bd:1,w:1,h:"left"});X.set(row+1,2,"",{bd:1});X.merge(row,2,row+1,2);
     X.heights[row]=36;row+=2});
   line(row,"แผน",tAl,tPl,tp,psum(tp,11),null,"tot",false);line(row+1,"ผล",0,0,ta,psum(ta,11),tPl>0?psum(ta,11)/tPl*100:0,"tota",false);
   X.set(row,1,"รวมทั้งสิ้น",{b:1,big:1,bd:1,h:"center"});X.set(row,2,"",{bd:1});X.set(row+1,1,"",{bd:1});X.set(row+1,2,"",{bd:1});X.merge(row,1,row+1,2);
@@ -1293,7 +1322,7 @@ function summaryHtml(rows,m,stOf){
   rows.forEach(function(r){
     var pm=psum(r.p,m),a=psum(r.a,11),lim=r.pl||r.al,st=stOf(r);
     var w=lim>0?Math.min(a/lim*100,100):0,mk=lim>0?Math.min(pm/lim*100,100):0;
-    h+='<tr><td class="pn">'+esc(r.n||"—")+'<small>'+esc((r.c?r.c+" · ":"")+(r.k||""))+'</small></td><td class="r">'+full(lim)+'</td><td class="r">'+full(pm)+'</td><td class="r">'+full(a)+'</td><td class="r">'+pf(pct(a,lim))+'</td><td><span class="pg"><i style="width:'+w.toFixed(1)+'%"></i><u style="left:'+mk.toFixed(1)+'%"></u></span></td><td class="r">'+full(lim-a)+'</td><td><span class="tag '+st[1]+'">'+st[0]+'</span></td></tr>';
+    h+='<tr><td class="pn">'+esc(r.n||"—")+'</td><td class="r">'+full(lim)+'</td><td class="r">'+full(pm)+'</td><td class="r">'+full(a)+'</td><td class="r">'+pf(pct(a,lim))+'</td><td><span class="pg"><i style="width:'+w.toFixed(1)+'%"></i><u style="left:'+mk.toFixed(1)+'%"></u></span></td><td class="r">'+full(lim-a)+'</td><td><span class="tag '+st[1]+'">'+st[0]+'</span></td></tr>';
   });
   if(!rows.length)h+='<tr><td colspan="8">ยังไม่มีรายการแผนของสำนักนี้</td></tr>';
   return h+'</tbody></table>';
@@ -1323,7 +1352,6 @@ function drawPlan(){
   rows.forEach(function(r){if(stOf(r)[1]==="late")late++});
   $("#planSum").innerHTML=summaryHtml(rows,m,stOf);
   $("#planTbl").innerHTML=sheetHtml(rows);
-  $("#planNote").textContent="เส้นสีส้มบนแถบ = ตำแหน่งแผนสะสมถึง "+MON[m]+" · "+(late?late+" รายการล่าช้ากว่าแผน":"ไม่มีรายการล่าช้ากว่าแผน")+" · ยอดเบิกจ่ายมาจากชีต INPUT ผ่านรหัสรายการ";
   $("#planBack").hidden=!pState.locked;
 }
 function planInit(){
@@ -1677,14 +1705,16 @@ function navInit(){
   var main=$("#report");if(!main)return;var wrap=main.parentNode;if(!wrap||document.getElementById("sideNav"))return;
   var items=[],seen=0;
   var add=function(el,label){if(!el||!label)return;if(!el.id)el.id="sec"+(++seen);items.push({el:el,label:label})};
-  add($("#kpis"),"ภาพรวม");
+  add($("#kpis"),"ภาพรวม");add(document.querySelector("#report .cc-head"),"ผลการเบิกจ่ายแยกตามหมวดงบรายจ่าย");
   Array.prototype.forEach.call(main.querySelectorAll(".card"),function(c){
     var h=c.querySelector(":scope>h2,:scope>.tbar h2,:scope>.thead h2,:scope>.cc-head h2");
-    if(!h)return;var t=c.id==="planSec"?"แผน–ผลรายสำนัก":c.id==="unitSec"?"ผลเบิกจ่ายรายสำนัก":h.textContent.replace(/\s+/g," ").trim();
+    if(!h)return;var t=c.id==="planSec"?"แผน–ผลรายสำนัก":c.id==="unitSec"?"ผลเบิกจ่ายรายสำนัก":((h.firstChild&&h.firstChild.nodeType===3)?h.firstChild.textContent:h.textContent).replace(/\s+/g," ").trim();
     add(c,t)});
-  var ORD=["ภาพรวม","วงเงินแบ่งตามการใช้จ่าย","รายละเอียดรายการที่คาดว่าจะเบิก","ผลเบิกจ่ายรายสำนัก","แผน–ผลรายสำนัก","รายการย่อยแบบลำดับชั้น","เกณฑ์เบิกจ่ายของกรมบัญชีกลาง"];
+  var ORD=["ภาพรวม","ผลการเบิกจ่ายแยกตามหมวดงบรายจ่าย","วงเงินแบ่งตามการใช้จ่าย","รายละเอียดรายการที่คาดว่าจะเบิก","ผลเบิกจ่ายรายสำนัก","แผน–ผลรายสำนัก","รายการย่อยแบบลำดับชั้น","เกณฑ์เบิกจ่ายของกรมบัญชีกลาง"];
   items=items.filter(function(x){return ORD.some(function(o){return x.label.indexOf(o)===0})});
   items.sort(function(x,y){var f=function(t){for(var i=0;i<ORD.length;i++)if(t.indexOf(ORD[i])===0)return i;return 99};return f(x.label)-f(y.label)});
+  (function(){var sc=$("#cCat"),anc=sc&&sc.nextSibling;if(!anc)return;
+    items.forEach(function(x){if(x.el.classList.contains("cc-head"))return;if(x.el.parentNode===main||(x.el.parentNode&&x.el.parentNode.parentNode===main)){main.insertBefore(x.el,anc)}})})();
   var nav=document.createElement("nav");nav.id="sideNav";nav.setAttribute("aria-label","เมนูหัวข้อ");
   nav.innerHTML='<div class="nt">เมนู</div>'+items.map(function(x,i){return'<a data-i="'+i+'" href="#'+x.el.id+'">'+esc(x.label)+'</a>'}).join("");
   wrap.insertBefore(nav,main);wrap.classList.add("hasnav");document.body.classList.add("hasnav");
@@ -1701,6 +1731,7 @@ function navInit(){
 }
 
 function heroInit(){
+  var ex=$("#expDet");if(ex&&ex.closest(".card"))ex.closest(".card").classList.add("goldbar");
   var k=$("#kpis"),h=$("#heroK");if(!k||!h)return;h.appendChild(k);
   var go=$("#heroGo");if(go)go.addEventListener("click",function(){var c=$("#report .card");if(c){c.classList.remove("collapsed");c.scrollIntoView({behavior:"smooth",block:"start"})}});
 }
