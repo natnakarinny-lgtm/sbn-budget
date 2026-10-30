@@ -748,7 +748,7 @@ function drawKPIs(list){
   var cards=[
    {k:"b",t:"งบประมาณที่ได้รับจัดสรร",v:s.b,sub:""},
    {k:"a",t:"เบิกจ่ายจริง",v:s.a,sub:'<span class="pillx">'+pf(p)+'</span> ของวงเงิน'},
-   {k:"r",t:"คงเหลือ",v:s.b-spent,sub:""},
+   {k:"r",t:"ยอด PO",v:s.po,sub:""},
    {k:"e",t:"คาดว่าจะเบิก",v:s.exp,sub:""},
    {k:"p",t:"ร้อยละเบิกจ่าย",pctv:p,sub:""},
    {k:"x",t:"คาดว่าจะเหลือจ่าย",v:s.b-spent-s.exp,sub:""}
